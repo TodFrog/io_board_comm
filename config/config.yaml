@@ -1,0 +1,51 @@
+# IO Board Communication Configuration
+# 시리얼 통신 및 동작 설정
+
+# Serial port settings (38400 baud, 8N1)
+serial:
+  # Port name
+  # - Windows: COM3, COM4, ...
+  # - Jetson: /dev/ttyUSB0, /dev/ttyTHS0, ...
+  port: "/dev/ttyUSB0"
+
+  # Communication parameters (VB 소스와 동일)
+  baudrate: 38400
+  bytesize: 8
+  parity: "N"  # None
+  stopbits: 1
+
+  # Timeout settings (seconds)
+  timeout: 1.0
+  write_timeout: 1.0
+
+# Communication behavior
+communication:
+  # Retry settings
+  retry_count: 3
+  retry_delay: 0.1  # seconds between retries
+
+  # Response timeout
+  response_timeout: 2.0  # seconds
+
+  # LRC validation (currently disabled in VB source)
+  validate_lrc: false
+
+# LoadCell settings
+loadcell:
+  num_channels: 10
+  bytes_per_channel: 6
+
+# Logging
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+  file: "io_board.log"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+# Platform-specific defaults
+platforms:
+  windows:
+    default_port: "COM3"
+  linux:
+    default_port: "/dev/ttyUSB0"
+  jetson:
+    default_port: "/dev/ttyTHS0"
