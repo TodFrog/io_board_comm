@@ -8,11 +8,17 @@ Nvidia Jetson Orin/Nano 및 Windows용 IO 보드 시리얼 통신 라이브러�
 - **LoadCell 10채널**: 무게 센서 읽기, 제로 캘리브레이션
 - **시스템 관리**: 정보 조회, 에러 히스토리, 리셋
 - **MQTT 인터페이스**: CHAI Interface 스펙 기반 JSON 메시지 핸들러
+- **실시간 모니터링 UI**: PyQt5 기반 LoadCell/DeadBolt 모니터링 (Kalman filter 지원)
 
 ## 설치
 
 ```bash
-pip install pyserial
+# 기본 설치
+pip install -e .
+
+# UI 기능 포함 설치
+pip install -e .
+pip install PyQt5 matplotlib numpy
 ```
 
 ## 빠른 시작
@@ -101,6 +107,39 @@ sudo udevadm control --reload-rules
 | MC-PD | MC | PD | 공장 초기화 |
 | MC-RT | MC | RT | 시스템 리셋 |
 
+## 실시간 모니터링 UI
+
+PyQt5 기반의 실시간 모니터링 UI를 제공합니다.
+
+### 실행
+
+```bash
+python scripts/run_monitor.py
+```
+
+### 기능
+
+| 탭 | 기능 |
+|----|------|
+| **LoadCell Monitor** | 10채널 실시간 그래프, Kalman filter 노이즈 제거, Zero Calibration |
+| **DeadBolt Control** | Door/Lock 상태 표시, Open/Close 버튼 제어 |
+
+### Kalman Filter
+
+LoadCell 측정값의 노이즈를 제거하기 위한 1D Kalman filter를 지원합니다.
+
+```python
+from io_board.ui.filters import KalmanFilter, MultiChannelKalmanFilter
+
+# 단일 채널
+kf = KalmanFilter(process_noise=0.01, measurement_noise=1.0)
+filtered = kf.update(raw_value)
+
+# 10채널 동시 필터링
+mcf = MultiChannelKalmanFilter(num_channels=10)
+filtered_values = mcf.update(raw_values)
+```
+
 ## MQTT 인터페이스
 
 CHAI Interface 스펙 기반 MQTT JSON 메시지 핸들러를 제공합니다.
@@ -156,10 +195,18 @@ io_board_comm/
 │   ├── system.py            # 시스템 관리
 │   ├── mqtt_topics.py       # MQTT 토픽 상수
 │   ├── mqtt_interface.py    # MQTT 핸들러
-│   └── exceptions.py        # 예외 클래스
+│   ├── exceptions.py        # 예외 클래스
+│   └── ui/                  # 모니터링 UI
+│       ├── main_window.py   # 메인 윈도우
+│       ├── loadcell_widget.py   # LoadCell 모니터
+│       ├── deadbolt_widget.py   # DeadBolt 제어
+│       └── filters/
+│           └── kalman.py    # Kalman filter
 ├── tests/                   # 단위 테스트
 ├── examples/                # 사용 예제
-└── scripts/                 # 유틸리티 스크립트
+└── scripts/
+    ├── test_connection.py   # 연결 테스트
+    └── run_monitor.py       # 모니터링 UI 실행
 ```
 
 ## 라이선스
